@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
-import "./index.css"; // Импортируем файл со стилями
+import "./index.css"; 
 
 // Определение интерфейса для ячейки таблицы
 interface Cell {
   id: string;
   value: string;
   type: "number" | "percent" | "name" | "text";
-  rowspan?: number; // Количество строк, которые занимает ячейка
-  colspan?: number; // Количество столбцов, которые занимают ячейка
+  rowspan?: number;
+  colspan?: number; 
 }
 
 // Исходные данные для таблицы
@@ -46,44 +46,35 @@ const EditableTable: React.FC = () => {
   const isValueChanged = (rowIndex: number, colIndex: number, newValue: string): boolean => {
     const initialValue = initialData[rowIndex][colIndex].value;
 
-    // Для ячейки "Мастер: Иванов И.И." сравниваем только редактируемую часть
+
     if (data[rowIndex][colIndex].id === "header3") {
       const initialName = initialValue.split(":")[1]?.trim() || "";
       return newValue.trim() !== initialName;
     }
-
-    // Для остальных ячеек просто сравниваем значения
     return newValue.trim() !== initialValue.trim();
   };
 
-  // Обработчик изменения значения ячейки
   const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
     const cellId = data[rowIndex][colIndex].id;
-
-    // Применяем валидацию
+   
     let updatedValue = validateInput(data[rowIndex][colIndex].type, value);
-
-    // Если это ячейка "Мастер: Иванов И.И."
+  
     if (cellId === "header3") {
       updatedValue = `Мастер: ${updatedValue}`;
     }
 
-    // Если значение не изменилось относительно начального, ничего не делаем
     if (!isValueChanged(rowIndex, colIndex, updatedValue)) {
       delete editedCells[cellId];
       setEditedCells({ ...editedCells });
       return;
     }
 
-    // Обновляем данные в состоянии
     const newData = [...data];
     newData[rowIndex][colIndex].value = updatedValue;
     setData(newData);
 
-    // Добавляем измененную ячейку в список отредактированных
     setEditedCells((prev) => ({ ...prev, [cellId]: updatedValue }));
 
-    // Сбрасываем таймер, если он уже запущен
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       setProgress(0);
@@ -97,7 +88,7 @@ const EditableTable: React.FC = () => {
       const interval = setInterval(() => {
         if (currentProgress >= 100) {
           clearInterval(interval);
-          console.log("Отправленные изменения:", editedCells); // Выводим измененные ячейки
+          console.log("Отправленные изменения:", editedCells); 
           setTimerActive(false);
           setProgress(0);
           setEditedCells({});
@@ -109,7 +100,7 @@ const EditableTable: React.FC = () => {
     }, 5000);
   };
 
-  // Валидация вводимых данных
+  // Валидация
   const validateInput = (type: Cell["type"], value: string): string => {
     switch (type) {
       case "number":
@@ -124,7 +115,7 @@ const EditableTable: React.FC = () => {
     }
   };
 
-  // Установка позиции курсора перед символом % (для onFocus)
+ 
   const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     if (value.endsWith("%")) {
@@ -133,7 +124,7 @@ const EditableTable: React.FC = () => {
     }
   };
 
-  // Установка позиции курсора перед символом % (для onClick)
+
   const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     const value = target.value;
@@ -155,8 +146,7 @@ const EditableTable: React.FC = () => {
                   className={rowIndex === 0 ? "header-cell" : "cell"}
                   rowSpan={cell.rowspan || 1}
                   colSpan={cell.colspan || 1}
-                >
-                  {/* Отдельная обработка для ячейки "Мастер: Иванов И.И." */}
+                >                  
                   {cell.id === "header3" ? (
                     <div className="master-cell">
                       <span className="master-label">Мастер:</span>{" "}
@@ -184,7 +174,7 @@ const EditableTable: React.FC = () => {
                       onFocus={handleFocus}
                       onClick={handleClick}
                       className={`textarea-cell ${cell.id === "cell3-2" ? "red-text" : ""}`}
-                      rows={cell.id === "cell1-3" ? 3 : 1} // Устанавливаем количество строк для многострочного текста                     
+                      rows={cell.id === "cell1-3" ? 3 : 1}               
                     />
                   )}
                 </td>
@@ -193,8 +183,7 @@ const EditableTable: React.FC = () => {
           ))}
         </tbody>
       </table>
-
-      {/* Прогресс-бар */}
+      
       {Object.keys(editedCells).length > 0 && timerActive && (
         <div className="progress-bar-container">
           <div className="progress-text">Отправка данных через: {Math.ceil((100 - progress) / 10)} секунд</div>
